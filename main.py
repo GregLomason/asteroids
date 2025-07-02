@@ -45,14 +45,18 @@ def main():
         
         screen.fill((0,0,0))
         updatables.update(dt)
+        
+        # Collision Detection - between asteroid, player, and bullets
         for asteroid in asteroids:
+            for shot in shots:
+                if asteroid.collides_with(shot):
+                    asteroid.split()
+                    shot.kill()
             if player.collides_with(asteroid):
                 print ("Game over!")
                 return
-            for shot in shots:
-                if asteroid.collides_with(shot):
-                    asteroid.kill()
-                    shot.kill()
+            
+        # Draw Objects
         for obj in drawables:
             obj.draw(screen)
         pygame.display.flip()
