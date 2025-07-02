@@ -4,15 +4,16 @@
 import pygame
 from circleshape import CircleShape
 from shot import Shot
-from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED
+from constants import PLAYER_RADIUS, PLAYER_TURN_SPEED, PLAYER_SPEED, PLAYER_SHOOT_SPEED, PLAYER_SHOOT_COOLDOWN
 
 # Player Class - Represents the Player's Spaceship
 class Player(CircleShape):
     
-    # Initializes Player's Position, Size, and Rotation
+    # Initializes Player's Position, Size, Rotation, and Shoot Cooldown Timer
     def __init__(self, x, y):
         super().__init__(x, y, PLAYER_RADIUS)
         self.rotation = 0
+        self.shoot_timer = 0  # Time remaining until the player can shoot again
 
     # Calculates the Three Points of the Triangle Representing the Ship
     def triangle(self):
@@ -36,14 +37,22 @@ class Player(CircleShape):
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
         self.position += forward * PLAYER_SPEED * dt
         
-    # Spawns a Shot Moving in the Direction the Player is Facing
+    # Spawns a Shot Moving in the Direction the Player is Facing, with Cooldown Check
     def shoot(self):
+        if self.shoot_timer > 0:
+            return  # Too soon to shoot again
+    
         shot = Shot(self.position.x, self.position.y)
         velocity = pygame.Vector2(0, 1).rotate(self.rotation) * PLAYER_SHOOT_SPEED
         shot.velocity = velocity
-
-    # Handles Player Input for Movement, Rotation, and Shooting
+        self.shoot_timer = PLAYER_SHOOT_COOLDOWN
+        
+    # Handles Player Input for Movement, Rotation, Shooting, and Updates Cooldown Timer
     def update(self, dt):
+        self.shoot_timer -= dt
+        if self.shoot_timer < 0:
+            self.shoot_timer = 0
+            
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
